@@ -1,0 +1,7 @@
+.claude/
+.tldr/
+.tldrignore
+# kaynak fotoğraflar sadece kökte ignore (site img/ içindeki optimize kopyaları kullanıyor)
+/koseoglu-logo.webp
+/koseoglu-mobil-jenerator-*.webp
+/kosoglu-mobil-jenerator-*.webp
