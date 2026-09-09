@@ -21,7 +21,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+/* Yumuşak kaydırma JS ile yönetiliyor (süre/easing kontrolü için) */
 
 body {
   background: var(--black);
@@ -95,15 +95,20 @@ img { max-width: 100%; display: block; }
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   padding: 18px 0;
-  transition: padding 0.35s var(--ease), background 0.35s, box-shadow 0.35s;
+  transition: padding 0.35s var(--ease), box-shadow 0.35s;
 }
-.nav.scrolled {
-  padding: 10px 0;
+/* Blur arka planı ::before katmanında: nav'ın kendisinde backdrop-filter olursa
+   içindeki position:fixed mobil menünün referansı bozulur (containing block kuralı) */
+.nav::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
   background: rgba(11, 11, 12, 0.82);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 1px 0 var(--line);
+  opacity: 0; transition: opacity 0.35s;
+  pointer-events: none;
 }
+.nav.scrolled { padding: 10px 0; box-shadow: 0 1px 0 var(--line); }
+.nav.scrolled::before { opacity: 1; }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--white); }

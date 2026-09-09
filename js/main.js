@@ -165,10 +165,50 @@ bookingForm?.addEventListener("submit", (e) => {
   bookingForm.reset();
 });
 
-/* ---------- Yukarı dön ---------- */
-document.getElementById("toTop")?.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
+/* ---------- Yumuşak kaydırma (özel süre + easing) ---------- */
+let scrollAnim = null;
+
+function smoothScrollTo(targetY) {
+  const startY = window.scrollY;
+  const dist = targetY - startY;
+  if (Math.abs(dist) < 2) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    window.scrollTo(0, targetY);
+    return;
+  }
+  // Mesafeye göre 600ms–1400ms arası süre
+  const duration = Math.min(1400, Math.max(600, Math.abs(dist) * 0.45));
+  const start = performance.now();
+  cancelAnimationFrame(scrollAnim);
+  function step(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; // easeInOutCubic
+    window.scrollTo(0, startY + dist * eased);
+    if (p < 1) scrollAnim = requestAnimationFrame(step);
+  }
+  scrollAnim = requestAnimationFrame(step);
+}
+
+// Kullanıcı tekerlek/dokunuşla araya girerse animasyonu bırak
+["wheel", "touchstart"].forEach((ev) =>
+  window.addEventListener(ev, () => cancelAnimationFrame(scrollAnim), { passive: true })
+);
+
+// Tüm sayfa içi bağlantıları özel kaydırmaya bağla
+document.querySelectorAll('a[href^="#"]').forEach((a) => {
+  a.addEventListener("click", (e) => {
+    const id = a.getAttribute("href");
+    if (id.length <= 1) return;
+    const target = document.querySelector(id);
+    if (!target) return;
+    e.preventDefault();
+    smoothScrollTo(target.getBoundingClientRect().top + window.scrollY);
+    history.pushState(null, "", id);
+  });
 });
+
+/* ---------- Yukarı dön ---------- */
+document.getElementById("toTop")?.addEventListener("click", () => smoothScrollTo(0));
 
 /* ---------- Yıl ---------- */
 const yearEl = document.getElementById("year");
